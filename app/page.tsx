@@ -4,6 +4,7 @@ import Image from "next/image";
 import styles from "./page.module.scss";
 import Lenis from "@studio-freight/lenis";
 
+
 const images = [
   "1.jpg",
   "2.jpg",
