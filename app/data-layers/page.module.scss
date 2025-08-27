@@ -1,0 +1,35 @@
+.main {
+  margin: 0 20%;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 10vh;
+  padding: 10vh 0;
+  width: 100%;
+  background-color: lightgray;
+}
+
+.imageStart, .imageEnd {
+  height: 300px;
+  align-content: center;
+  width: 50%;
+}
+
+.imageStart {
+  align-self: flex-start;
+
+}
+
+.imageEnd {
+  align-self: flex-end;
+}
+
+.imageCutoff {
+  overflow: hidden;
+}
+
+.imageCenter {
+  align-self: center;
+}
