@@ -1,0 +1,12 @@
+.main {
+  padding: 4rem;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+
+  @media (min-width: 1280px) {
+    padding: 8rem;
+  }
+}

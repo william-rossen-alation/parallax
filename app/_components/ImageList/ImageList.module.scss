@@ -1,0 +1,25 @@
+// ImageList component styles
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 10vh;
+  padding: 10vh 0;
+  width: 100%;
+}
+
+.imageStart {
+  align-self: flex-start;
+}
+
+.imageEnd {
+  align-self: flex-end;
+}
+
+.imageCutoff {
+  overflow: hidden;
+}
+
+.imageCenter {
+  align-self: center;
+}

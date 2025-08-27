@@ -1,0 +1,10 @@
+// Parallax component styles
+.parallax {
+  // Base styles for parallax container
+  position: relative;
+}
+
+.target {
+  // Styles for the target element that gets animated
+  will-change: transform;
+}
