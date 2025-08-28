@@ -1,0 +1,64 @@
+.main {
+  margin: 0 20%;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr;
+  gap: 100px;
+}
+
+.imageStart, .imageEnd, .trigger {
+
+}
+
+.grid {
+  height: 800px;
+}
+
+.allie {
+  width: 100px;
+  background-color: pink;
+}
+
+.active {
+  background-color: red;
+}
+
+.div2 {
+  background-color: green;
+  grid-column-start: 2;
+  grid-row-start: 1;
+  grid-row-end: 3;
+}
+
+.div3 {
+  background-color: lightblue;
+}
+
+.imageToGrid {
+  background-color: blue;
+  height: 100%;
+}
+
+.overflowHidden {
+  overflow: hidden;
+}
+
+.imageStart {
+  // background-color: red;
+  // height: 800px;
+}
+
+.imageEnd {
+
+}
+
+.imageCutoff {
+
+}
+
+.imageCenter {
+
+}

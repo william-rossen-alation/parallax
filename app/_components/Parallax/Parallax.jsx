@@ -33,6 +33,7 @@ export function Parallax({ className, children, speed = 1, id ="parallax" }) {
         scrub: true,
         start: 'top bottom',
         end: 'bottom top',
+        markers: true,
         onUpdate: (e) => {
           setY(e.progress * y);
         },
@@ -45,7 +46,7 @@ export function Parallax({ className, children, speed = 1, id ="parallax" }) {
   }, [id, speed, windowWidth])
 
   return (
-    <div ref={trigger} className={className}>
+    <div ref={trigger} className={`${className} trigger`}>
       <div ref={target}>{children}</div>
     </div>
   );
