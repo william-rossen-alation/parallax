@@ -1,4 +1,5 @@
 import { Parallax } from "../_components/Parallax/Parallax";
+import { ParallaxPin } from "../_components/ParallaxPin/ParallaxPin";
 import styles from "./page.module.scss";
 import Spacer from "../_components/spacer/spacer";
 import SmoothScrolling from "../_components/SmoothScrolling/SmoothScrolling";
@@ -40,7 +41,19 @@ export default function DataLayersTwo() {
 
           </div>
           <div className={`${styles.div4} ${styles.grid}`}>DIV 4</div>
-          <div className={`${styles.div5} ${styles.grid}`}>DIV 5</div>
+          <div className={`${styles.div5} ${styles.grid}`}>
+            <ParallaxPin speed={4} id="parallax-5" className={styles.imageEnd}>
+              <Image 
+                src="/data-layers/databases.png"
+                alt="Alation's data catalog"
+                width={1000}
+                height={1000}
+                sizes="100vw"
+                priority
+                style={{ width: '100%', height: 'auto' }}
+              />
+            </ParallaxPin>
+          </div>
           <div className={`${styles.div6} ${styles.grid}`}>DIV 6</div>
           <div className={`${styles.div7} ${styles.grid}`}>DIV 7</div>
           <div className={`${styles.div8} ${styles.grid}`}>DIV 8</div>

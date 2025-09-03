@@ -35,7 +35,7 @@ export function Test({ children, className, activeClass }) {
         scrub: 3, // locks animation to scroll position with true - using #'s gives it delay
         pin: true, // pins the element to the screen while trigger is active [assumes trigger is the element being pinned but can add ANY element here]
         toggleActions: "restart pause reverse pause",
-        markers: true,
+        // markers: true,
       },
     });
 
