@@ -40,30 +40,11 @@ export const Hero = ({ className }) => {
       },
     });
 
-    // tl.fromTo(overlay.current,
-    //   { y: 0, rotation: 0, scale: 1 },
-    //   { y: -800, rotation: 360, scale: 3},
-    //   0,
-    // ).set({},{}, 0.2)
 
-    // const dragonArriveTween = gsap.to(overlay.current, {  
-    //   y: -800,
-    //   rotation: 360,
-    //   scale: 2,
-    //   duration: 2, // duration in seconds
-    // }, 1);  // when to start in seconds after the timeline starts (1 would be 1/5th of timeline with the 5 coming from the duration I set below)
-
-    // const dragonLeaveTween = gsap.to(overlay.current, { 
-    //   y: 0,
-    //   rotation: 0,
-    //   scale: 1,
-    //   duration: 2,
-    // }, 3);
-
-    // console.log('dragonArriveTween duration: ', dragonArriveTween.duration());
-    
-    // tl.add(dragonArriveTween, 1);
-    tl.to(overlay.current, {  
+    // calling gsap.to() immediately runs animation BUT calling .to() on a timeline does not run animation until the timeline is added to the main timeline
+    const dragonSequence = gsap.timeline();
+    dragonSequence
+      .to(overlay.current, {  
         y: -800,
         rotation: 360,
         scale: 2,
@@ -73,8 +54,9 @@ export const Hero = ({ className }) => {
         rotation: -360,
         scale: 0.02,
         duration: 2,
-      }, 3)
+      }, 3);
 
+    tl.add(dragonSequence, 0);
     tl.set({}, {}, 5); // 5 sets to the total timeline duration in seconds
     console.log('tl duration: ', tl.duration());
     /*
