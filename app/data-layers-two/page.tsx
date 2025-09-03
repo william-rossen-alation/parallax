@@ -42,7 +42,12 @@ export default function DataLayersTwo() {
           </div>
           <div className={`${styles.div4} ${styles.grid}`}>DIV 4</div>
           <div className={`${styles.div5} ${styles.grid}`}>
-            <ParallaxPin speed={4} id="parallax-5" className={styles.imageEnd}>
+            <ParallaxPin 
+              speed={4}
+              id="parallax-5"
+              className={styles.imageEnd}
+              // pinTrigger={}
+            >
               <Image 
                 src="/data-layers/databases.png"
                 alt="Alation's data catalog"

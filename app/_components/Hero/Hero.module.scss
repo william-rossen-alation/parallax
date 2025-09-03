@@ -1,0 +1,16 @@
+.background {
+  height: 800px;
+  background-image: url('/mountains.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.imageOverlay {
+  position: absolute;
+  bottom: -500px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 500px;
+  width: 500px;
+}
