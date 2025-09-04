@@ -49,3 +49,42 @@ export const HeroGradient = ({ className }) => {
     </div>
   )
 }
+
+export const HeroGradientOpacityOverlay = ({ className }) => {
+  const overlayRef = useRef(null);
+  const heroRef = useRef(null);
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    gsap.fromTo(overlayRef.current, 
+      {
+        opacity: 0,
+      },
+      {
+        opacity: 1,
+        scrollTrigger: {
+          trigger: heroRef.current,
+          pin: heroRef.current,
+          start: "top top",
+          end: "+=10000",
+          // end: "bottom top",
+          scrub: 1,
+          markers: true,
+        }
+      }
+    )
+  },[])
+
+  return (
+    <div ref={heroRef} className={`${styles.heroOverlay} hero h-screen relative bg-gradient-to-b from-gray-900 to-gray-800`}>
+      <div 
+      ref={overlayRef}
+      className={`${styles.heroOverlay__overlay} absolute inset-0 bg-gradient-to-b from-gray-700 to-gray-500 opacity-0`}
+      />
+      <div className={styles.heroOverlay__content}>
+        <h1>Opacity Overlay Hero Gradient</h1>
+      </div>
+    </div>
+  )
+}

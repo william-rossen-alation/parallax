@@ -1,3 +1,32 @@
 .hero {
   height: 100vh;
 }
+
+.heroOverlay {
+  height: 100vh;
+  position: relative;
+  background: linear-gradient(to bottom, #111827, #1f2937);
+
+  &__overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(to bottom, #374151, #6b7280);
+    opacity: 0;
+  }
+
+  &__content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+
+    & h1 {
+      color: yellow;
+    }
+  }
+}

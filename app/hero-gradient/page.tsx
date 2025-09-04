@@ -3,7 +3,7 @@
 import styles from "./page.module.scss";
 import Image from "next/image";
 import { Hero } from "../_components/Hero/Hero";
-import { HeroGradient } from "../_components/HeroGradient/HeroGradient";
+import { HeroGradient, HeroGradientOpacityOverlay } from "../_components/HeroGradient/HeroGradient";
 import Spacer from "../_components/spacer/spacer";
 import SmoothScrolling from "../_components/SmoothScrolling/SmoothScrolling";
 import { useEffect, useRef, useState } from "react";
@@ -16,7 +16,8 @@ export default function HeroTest({}) {
     <SmoothScrolling>
       <div>
         {/* <Spacer /> */}
-        <HeroGradient className={styles.heroGradient}/>
+        {/* <HeroGradient className={styles.heroGradient}/> */}
+        <HeroGradientOpacityOverlay className={styles.heroGradientOpacityOverlay}/>
         <Spacer />
       </div>
     </SmoothScrolling>
