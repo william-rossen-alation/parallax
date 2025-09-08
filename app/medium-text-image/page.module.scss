@@ -1,0 +1,22 @@
+.container {
+  margin: 0 20%;
+}
+
+.itemWrapper {
+  background-color: lightgray;
+  display: flex;
+  height: 100vh;
+  align-items: center;
+
+  & > div {
+    flex: 1;
+    width: 50%;
+  }
+
+  & .imageContainer {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+}

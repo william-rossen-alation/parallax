@@ -13,7 +13,8 @@
     right: 0;
     bottom: 0;
     left: 0;
-    background: linear-gradient(to bottom, #374151, #6b7280);
+    background: linear-gradient(to bottom, #002E4B, #FFF2EB);
+    // background: linear-gradient(to bottom, #374151, #6b7280);
     opacity: 0;
   }
 
@@ -26,7 +27,7 @@
     height: 100%;
 
     & h1 {
-      color: yellow;
+      color: white;
     }
   }
 }

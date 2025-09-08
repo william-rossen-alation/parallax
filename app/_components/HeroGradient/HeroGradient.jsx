@@ -57,23 +57,36 @@ export const HeroGradientOpacityOverlay = ({ className }) => {
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
 
-    gsap.fromTo(overlayRef.current, 
-      {
-        opacity: 0,
-      },
-      {
-        opacity: 1,
-        scrollTrigger: {
-          trigger: heroRef.current,
-          pin: heroRef.current,
-          start: "top top",
-          end: "+=10000",
-          // end: "bottom top",
-          scrub: 1,
-          markers: true,
-        }
+    gsap.timeline({
+      scrollTrigger: {
+        trigger: heroRef.current,
+        pin: heroRef.current,
+        start: "top top",
+        end: "+=40000",
+        scrub: 1,
+        markers: true,
       }
-    )
+    })
+    .fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1 })
+    // .fromTo(heroRef.current, { "--text-color": "#ffffff" }, { "--text-color": "#35444D" }, 0); // 0 means start at the same time
+
+    // gsap.fromTo(overlayRef.current, 
+    //   {
+    //     opacity: 0,
+    //   },
+    //   {
+    //     opacity: 1,
+    //     scrollTrigger: {
+    //       trigger: heroRef.current,
+    //       pin: heroRef.current,
+    //       start: "top top",
+    //       end: "+=40000",
+    //       // end: "bottom top",
+    //       scrub: 1,
+    //       markers: true,
+    //     }
+    //   }
+    // )
   },[])
 
   return (
@@ -83,7 +96,7 @@ export const HeroGradientOpacityOverlay = ({ className }) => {
       className={`${styles.heroOverlay__overlay} absolute inset-0 bg-gradient-to-b from-gray-700 to-gray-500 opacity-0`}
       />
       <div className={styles.heroOverlay__content}>
-        <h1>Opacity Overlay Hero Gradient</h1>
+        <h1 style={{ color: "var(--text-color, #ffffff)" }}>Opacity Overlay Hero Gradient</h1>
       </div>
     </div>
   )

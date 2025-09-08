@@ -18,7 +18,7 @@ export default function HeroTest({}) {
         {/* <Spacer /> */}
         {/* <HeroGradient className={styles.heroGradient}/> */}
         <HeroGradientOpacityOverlay className={styles.heroGradientOpacityOverlay}/>
-        <Spacer />
+        <Spacer className={styles.lightOrange}/>
       </div>
     </SmoothScrolling>
   )
