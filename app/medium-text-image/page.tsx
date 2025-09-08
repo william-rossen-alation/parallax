@@ -1,4 +1,7 @@
 import MasterTextImage from '../_components/MasterTextImage/MasterTextImage';
+import SmoothScrolling from '../_components/SmoothScrolling/SmoothScrolling';
+import Spacer from '../_components/spacer/spacer';
+import styles from './page.module.scss';
 
 const tempData = [
   {
@@ -16,5 +19,14 @@ const tempData = [
 ];
 
 export default function MediumTextImage() {
-  return <MasterTextImage data={tempData} />;
+  return (
+    <>
+      <Spacer className={styles.lightOrange}/>
+      <SmoothScrolling>
+        <MasterTextImage data={tempData} />
+      </SmoothScrolling>
+      <Spacer className={styles.lightOrange}/>
+    </>
+
+);
 }
