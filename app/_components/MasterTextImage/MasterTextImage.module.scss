@@ -1,0 +1,56 @@
+.masterContainer {
+  height: 100vh;
+  display: flex;
+  overflow: hidden;
+  background-color: lightgray; // Temporary for testing
+}
+
+.textContainer {
+  flex: 1;
+  width: 50%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  order: 1; // Text on left
+}
+
+.imageContainer {
+  position: relative; // Required for Next.js Image with fill={true}
+  flex: 1;
+  width: 50%;
+  height: 100%;
+  order: 2; // Image on right
+  
+  // Next.js Image component styles
+  img {
+    position: absolute !important; // Override Next.js defaults
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+  }
+}
+
+.textContainer {
+  .textItem {
+    position: absolute;
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+    width: 80%; // Prevent text from touching edges
+    white-space: nowrap; // Prevent wrapping during animation
+    overflow: hidden; // Hide overflow during animation
+  }
+}
+
+.errorContainer {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: red;
+  background-color: #f0f0f0;
+}

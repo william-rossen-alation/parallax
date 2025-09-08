@@ -1,37 +1,20 @@
-import styles from './page.module.scss';
-import Image from 'next/image';
-import { TextImage } from '../_components/TextImage/TextImage';
+import MasterTextImage from '../_components/MasterTextImage/MasterTextImage';
 
 const tempData = [
   {
     image: "/medium-text-image/image1.webp",
     firstTitle: "First Title",
-    firstText: "First Text",
   },
   {
-    image: "/medium-text-image/image1.webp",
+    image: "/medium-text-image/image2.webp",
     firstTitle: "Second Title",
-    firstText: "Second Text",
   },
   {
-    image: "/medium-text-image/image1.webp",
+    image: "/medium-text-image/image3.webp",
     firstTitle: "Third Title",
-    firstText: "Third Text",
   }
-]
+];
 
 export default function MediumTextImage() {
-  return (
-    <div className={styles.container}>
-      {tempData.map((item, index) => {
-        return (
-          <TextImage 
-            key={`${index}-text-image-component`} 
-            item={item}
-            index={index} 
-          />
-        )
-      })}
-    </div>
-  )
+  return <MasterTextImage data={tempData} />;
 }
