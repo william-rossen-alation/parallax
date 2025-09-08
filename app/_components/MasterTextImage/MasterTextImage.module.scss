@@ -42,6 +42,7 @@
     width: 80%; // Prevent text from touching edges
     white-space: nowrap; // Prevent wrapping during animation
     overflow: hidden; // Hide overflow during animation
+    transform: translateY(100vh); // Initially position off-screen (before GSAP takes over)
   }
 }
 

@@ -53,10 +53,11 @@ const MasterTextImage = ({ data }) => {
       scrollTrigger: {
         trigger: containerRef.current,
         start: "top top",
-        end: `+=${numSections * 100}vh`, // Dynamic scroll distance
+        end: `+=${numSections * 10000}vh`, // 100x longer scroll distance (300vh per section)
+        // end: `+=${numSections * 300}vh`, // 3x longer scroll distance (300vh per section)
         pin: true,
         scrub: 1,
-        markers: true, // Enable for Phase 2 testing
+        markers: true, // Enable for testing
         onUpdate: (self) => {
           console.log('Scroll progress:', self.progress);
         }
@@ -104,6 +105,26 @@ const MasterTextImage = ({ data }) => {
     });
   };
 
+  const createTextAnimations = (data, masterTimeline, sectionDuration, transitionDuration, textRefs) => {
+    data.forEach((item, index) => {
+      // Calculate timing for this section
+      const sectionStart = index * sectionDuration;
+      const sectionEnd = sectionStart + sectionDuration;
+      
+      // TEXT ANIMATIONS
+      // Set initial position (start from bottom of viewport)
+      gsap.set(textRefs.current[index], { y: "100vh" });
+      
+      // Single continuous animation: bottom → center → top
+      // This spans the entire section duration for smooth, consistent movement
+      masterTimeline.to(textRefs.current[index], {
+        y: "-100vh", // Move from 100vh to -100vh (bottom to top)
+        duration: sectionDuration, // Use full section duration
+        ease: "none" // Linear movement to match scroll speed
+      }, sectionStart);
+    });
+  };
+
   // Phase 2: Initialize image animations
   useEffect(() => {
     if (!validateDataLength(data)) {
@@ -118,19 +139,25 @@ const MasterTextImage = ({ data }) => {
         
         gsap.registerPlugin(ScrollTrigger);
         
-        // Wait for images to be referenced
+        // Wait for all refs to be initialized
         if (!imageRefs.current.every(ref => ref !== null)) {
           console.warn('Not all image refs are initialized yet');
+          return;
+        }
+        
+        if (!textRefs.current.every(ref => ref !== null)) {
+          console.warn('Not all text refs are initialized yet');
           return;
         }
         
         const { masterTimeline, sectionDuration, transitionDuration } = createDynamicTimeline(data, containerRef);
         masterTimelineRef.current = masterTimeline;
         
-        // Only create image animations for Phase 2
+        // Create both image and text animations for Phase 3
         createImageAnimations(data, masterTimeline, sectionDuration, transitionDuration, imageRefs);
+        createTextAnimations(data, masterTimeline, sectionDuration, transitionDuration, textRefs);
         
-        console.log('Phase 2: Image animations initialized');
+        console.log('Phase 3: Image and text animations initialized');
         
       } catch (error) {
         console.error('Failed to initialize animations:', error);
@@ -190,7 +217,7 @@ const MasterTextImage = ({ data }) => {
             ref={el => textRefs.current[index] = el}
             className={styles.textItem}
             style={{ 
-              opacity: index === 0 ? 1 : 0 // Only show first text initially
+              opacity: 1 // Let GSAP animations control visibility via transforms
             }}
           >
             {item.firstTitle}
