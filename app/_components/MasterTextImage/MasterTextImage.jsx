@@ -53,13 +53,14 @@ const MasterTextImage = ({ data }) => {
       scrollTrigger: {
         trigger: containerRef.current,
         start: "top top",
-        end: `+=${numSections * 10000}vh`, // 100x longer scroll distance (300vh per section)
-        // end: `+=${numSections * 300}vh`, // 3x longer scroll distance (300vh per section)
+        end: `+=${numSections * 10000}vh`, // Optimized scroll distance (400vh per section)
+        // end: `+=${numSections * 400}vh`, // Optimized scroll distance (400vh per section)
         pin: true,
         scrub: 1,
-        markers: true, // Enable for testing
+        // markers: true, // Disabled for production
         onUpdate: (self) => {
-          console.log('Scroll progress:', self.progress);
+          // Optional: Enable for debugging
+          // console.log('Scroll progress:', self.progress);
         }
       }
     });
@@ -153,25 +154,60 @@ const MasterTextImage = ({ data }) => {
         const { masterTimeline, sectionDuration, transitionDuration } = createDynamicTimeline(data, containerRef);
         masterTimelineRef.current = masterTimeline;
         
-        // Create both image and text animations for Phase 3
+        // Apply GPU acceleration for better performance
+        gsap.set(imageRefs.current, {
+          force3D: true,
+          willChange: "opacity"
+        });
+        
+        gsap.set(textRefs.current, {
+          force3D: true,
+          willChange: "transform"
+        });
+
+        // Create both image and text animations
         createImageAnimations(data, masterTimeline, sectionDuration, transitionDuration, imageRefs);
         createTextAnimations(data, masterTimeline, sectionDuration, transitionDuration, textRefs);
         
-        console.log('Phase 3: Image and text animations initialized');
+        // console.log('Phase 4: Optimized animations initialized'); // Debug log
         
       } catch (error) {
         console.error('Failed to initialize animations:', error);
       }
     };
 
-    // Add a small delay to ensure refs are populated
-    const timeoutId = setTimeout(() => {
-      initializeAnimations();
-    }, 100);
+    // Preload images before starting animations
+    const imagePromises = data.map((item, index) => {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(index);
+        img.onerror = () => {
+          console.error(`Failed to load image: ${item.image}`);
+          reject(new Error(`Image ${index} failed to load`));
+        };
+        img.src = item.image;
+      });
+    });
+    
+    let timeoutId;
+    
+    Promise.allSettled(imagePromises).then((results) => {
+      const failedImages = results.filter(result => result.status === 'rejected');
+      if (failedImages.length > 0) {
+        console.warn(`${failedImages.length} images failed to load`);
+      }
+      
+      // Add a small delay to ensure refs are populated, then initialize
+      timeoutId = setTimeout(() => {
+        initializeAnimations();
+      }, 100);
+    });
 
     // Cleanup function
     return () => {
-      clearTimeout(timeoutId);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       try {
         if (masterTimelineRef.current) {
           masterTimelineRef.current.kill();
