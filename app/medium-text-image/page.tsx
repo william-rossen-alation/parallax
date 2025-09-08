@@ -1,5 +1,6 @@
 import styles from './page.module.scss';
 import Image from 'next/image';
+import { TextImage } from '../_components/TextImage/TextImage';
 
 const tempData = [
   {
@@ -24,17 +25,11 @@ export default function MediumTextImage() {
     <div className={styles.container}>
       {tempData.map((item, index) => {
         return (
-          <div key={index} className={styles.itemWrapper}>
-            <div>{item.firstTitle}</div>
-            <div className={styles.imageContainer}>
-              <Image 
-                src={`${item.image}`}
-                alt={item.firstTitle} 
-                fill={true}
-                style={{ objectFit: 'contain' }}
-              />
-            </div>
-          </div>
+          <TextImage 
+            key={`${index}-text-image-component`} 
+            item={item}
+            index={index} 
+          />
         )
       })}
     </div>
