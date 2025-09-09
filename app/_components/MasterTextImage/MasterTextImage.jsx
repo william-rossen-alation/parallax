@@ -176,32 +176,11 @@ const MasterTextImage = ({ data }) => {
       }
     };
 
-    // Preload images before starting animations
-    const imagePromises = data.map((item, index) => {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => resolve(index);
-        img.onerror = () => {
-          console.error(`Failed to load image: ${item.image}`);
-          reject(new Error(`Image ${index} failed to load`));
-        };
-        img.src = item.image;
-      });
-    });
-    
-    let timeoutId;
-    
-    Promise.allSettled(imagePromises).then((results) => {
-      const failedImages = results.filter(result => result.status === 'rejected');
-      if (failedImages.length > 0) {
-        console.warn(`${failedImages.length} images failed to load`);
-      }
-      
-      // Add a small delay to ensure refs are populated, then initialize
-      timeoutId = setTimeout(() => {
-        initializeAnimations();
-      }, 100);
-    });
+    // Initialize animations after a small delay to ensure refs are populated
+    // Note: Next.js handles image optimization and preloading automatically
+    const timeoutId = setTimeout(() => {
+      initializeAnimations();
+    }, 100);
 
     // Cleanup function
     return () => {
@@ -236,6 +215,7 @@ const MasterTextImage = ({ data }) => {
             ref={el => imageRefs.current[index] = el}
             src={item.image} 
             fill={true}
+            sizes="(max-width: 768px) 100vw, 50vw"
             style={{ 
               opacity: index === 0 ? 1 : 0, // Only show first image initially
               objectFit: 'contain' 
