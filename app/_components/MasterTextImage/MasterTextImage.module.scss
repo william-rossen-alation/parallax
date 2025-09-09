@@ -114,3 +114,61 @@
   height: auto;
   border-radius: 4px;
 }
+
+// Mobile layout styles (completely separate from desktop)
+.mobileContainer {
+  min-height: 100vh;
+  background-color: #fff;
+}
+
+.mobileContent {
+  padding: 1rem;
+}
+
+.mobileSection {
+  margin-bottom: 3rem;
+  text-align: center;
+
+  &:last-child {
+    margin-bottom: 6rem; // Extra space at bottom for scroll buffer
+  }
+}
+
+.mobileImageWrapper {
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.mobileImage {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mobileTextWrapper {
+  text-align: center;
+}
+
+.mobileTitle {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+  line-height: 1.3;
+}
+
+// Responsive adjustments for smaller mobile screens
+@media (max-width: 480px) {
+  .mobileTitle {
+    font-size: 1.5rem;
+  }
+
+  .mobileContent {
+    padding: 0.5rem;
+  }
+
+  .mobileSection {
+    margin-bottom: 2rem;
+  }
+}

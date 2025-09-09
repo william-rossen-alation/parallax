@@ -19,6 +19,7 @@ const MasterTextImage = ({ data, scrollDistancePerSection = DEFAULTS.SCROLL_DIST
   const textRefs = useRef(new Array(data.length).fill(null));
   const masterTimelineRef = useRef(null);
   const [hasError, setHasError] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   // Validation function
   const validateDataLength = (data) => {
@@ -101,8 +102,27 @@ const MasterTextImage = ({ data, scrollDistancePerSection = DEFAULTS.SCROLL_DIST
     });
   };
 
-  // Initialize scroll-triggered animations
+  // Initial mobile detection (once on page load only)
   useEffect(() => {
+    const checkMobile = () => {
+      if (typeof window !== 'undefined') {
+        const isMobileDevice = window.matchMedia('(max-width: 768px)').matches;
+        setIsMobile(isMobileDevice);
+        console.log('Initial mobile detection:', isMobileDevice ? 'Mobile' : 'Desktop');
+      }
+    };
+    
+    checkMobile();
+    // NO resize listener - detection happens only once on mount!
+  }, []); // Empty dependency array - runs once on mount
+
+  // Initialize scroll-triggered animations (desktop only)
+  useEffect(() => {
+    // Skip GSAP initialization on mobile
+    if (isMobile) {
+      console.log('Mobile detected - skipping GSAP initialization');
+      return;
+    }
     if (!validateDataLength(data)) {
       return;
     }
@@ -169,7 +189,7 @@ const MasterTextImage = ({ data, scrollDistancePerSection = DEFAULTS.SCROLL_DIST
         console.warn('Error during cleanup:', error);
       }
     };
-  }, [data, scrollDistancePerSection]);
+  }, [data, scrollDistancePerSection, isMobile]);
 
   if (!validateDataLength(data)) {
     return <div className={styles.errorContainer}>Invalid data provided</div>;
@@ -196,6 +216,33 @@ const MasterTextImage = ({ data, scrollDistancePerSection = DEFAULTS.SCROLL_DIST
                 />
               </div>
             </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Mobile Layout (early return - completely separate from desktop)
+  if (isMobile) {
+    return (
+      <div className={styles.mobileContainer}>
+        <div className={styles.mobileContent}>
+          {data.map((item, index) => (
+            <section key={index} className={styles.mobileSection}>
+              <div className={styles.mobileImageWrapper}>
+                <Image
+                  src={item.image}
+                  width={400}
+                  height={300}
+                  className={styles.mobileImage}
+                  alt={`${item.firstTitle} - Section ${index + 1}`}
+                  sizes="100vw"
+                />
+              </div>
+              <div className={styles.mobileTextWrapper}>
+                <h2 className={styles.mobileTitle}>{item.firstTitle}</h2>
+              </div>
+            </section>
           ))}
         </div>
       </div>
