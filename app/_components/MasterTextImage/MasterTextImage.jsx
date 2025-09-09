@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Image from 'next/image';
@@ -18,6 +18,7 @@ const MasterTextImage = ({ data, scrollDistancePerSection = DEFAULTS.SCROLL_DIST
   const imageRefs = useRef(new Array(data.length).fill(null));
   const textRefs = useRef(new Array(data.length).fill(null));
   const masterTimelineRef = useRef(null);
+  const [hasError, setHasError] = useState(false);
 
   // Validation function
   const validateDataLength = (data) => {
@@ -30,13 +31,16 @@ const MasterTextImage = ({ data, scrollDistancePerSection = DEFAULTS.SCROLL_DIST
     const transitionDuration = DEFAULTS.TRANSITION_DURATION;
     const sectionDuration = (1 - (numSections - 1) * transitionDuration) / numSections;
     
+    // Check for reduced motion preference
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    
     const masterTimeline = gsap.timeline({
       scrollTrigger: {
         trigger: containerRef.current,
         start: "top top",
         end: `+=${numSections * scrollDistancePerSection}vh`, // Configurable scroll distance
         pin: true,
-        scrub: 1,
+        scrub: prefersReducedMotion ? false : 1, // Respect reduced motion preference
         // markers: true, // Disabled for production
         onUpdate: (self) => {
           // Optional: Enable for debugging
@@ -97,10 +101,15 @@ const MasterTextImage = ({ data, scrollDistancePerSection = DEFAULTS.SCROLL_DIST
     });
   };
 
-  // Phase 2: Initialize image animations
+  // Initialize scroll-triggered animations
   useEffect(() => {
     if (!validateDataLength(data)) {
       return;
+    }
+
+    // Performance warning for large datasets
+    if (data.length > 8) {
+      console.warn(`${data.length} sections may impact performance. Consider splitting into multiple components.`);
     }
 
     const initializeAnimations = () => {
@@ -133,6 +142,7 @@ const MasterTextImage = ({ data, scrollDistancePerSection = DEFAULTS.SCROLL_DIST
         
       } catch (error) {
         console.error('Failed to initialize animations:', error);
+        setHasError(true);
       }
     };
 
@@ -165,8 +175,40 @@ const MasterTextImage = ({ data, scrollDistancePerSection = DEFAULTS.SCROLL_DIST
     return <div className={styles.errorContainer}>Invalid data provided</div>;
   }
 
+  // Fallback UI when animations fail
+  if (hasError) {
+    return (
+      <div className={styles.fallbackContainer}>
+        <div className={styles.fallbackContent}>
+          <p className={styles.fallbackMessage}>
+            Interactive animations are unavailable, but content is still accessible:
+          </p>
+          {data.map((item, index) => (
+            <div key={index} className={styles.fallbackSection}>
+              <h2 className={styles.fallbackTitle}>{item.firstTitle}</h2>
+              <div className={styles.fallbackImageWrapper}>
+                <Image
+                  src={item.image}
+                  alt={`${item.firstTitle} - Section ${index + 1} image`}
+                  width={600}
+                  height={400}
+                  className={styles.fallbackImage}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div ref={containerRef} className={styles.masterContainer}>
+    <div 
+      ref={containerRef} 
+      className={styles.masterContainer}
+      role="region"
+      aria-label="Interactive scroll-based content with text and images"
+    >
       {/* Fixed Image Container */}
       <div className={styles.imageContainer}>
         {data.map((item, index) => (
@@ -177,7 +219,7 @@ const MasterTextImage = ({ data, scrollDistancePerSection = DEFAULTS.SCROLL_DIST
             fill={true}
             sizes="(max-width: 768px) 100vw, 50vw"
             className={`${styles.imageItem} ${index === 0 ? styles.firstImage : ''}`}
-            alt={item.firstTitle}
+            alt={`${item.firstTitle} - Section ${index + 1} image`}
           />
         ))}
       </div>
@@ -189,6 +231,10 @@ const MasterTextImage = ({ data, scrollDistancePerSection = DEFAULTS.SCROLL_DIST
             key={`text-${index}`}
             ref={el => textRefs.current[index] = el}
             className={styles.textItem}
+            role="heading"
+            aria-level="2"
+            aria-live="polite"
+            aria-label={`Section ${index + 1}: ${item.firstTitle}`}
           >
             {item.firstTitle}
           </div>

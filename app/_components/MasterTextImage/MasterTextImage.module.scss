@@ -2,7 +2,6 @@
   height: 100vh;
   display: flex;
   overflow: hidden;
-  // background-color: lightgray; // Removed for production
 }
 
 .textContainer {
@@ -14,43 +13,43 @@
   align-items: center;
   justify-content: center;
   order: 1; // Text on left
-  
-  .textItem {
-    position: absolute;
-    font-size: 2rem;
-    font-weight: bold;
-    text-align: center;
-    width: 80%; // Prevent text from touching edges
-    white-space: nowrap; // Prevent wrapping during animation
-    overflow: hidden; // Hide overflow during animation
-    transform: translateY(100vh); // Initially position off-screen (before GSAP takes over)
-  }
+}
+
+.textItem {
+  position: absolute;
+  font-size: 2rem;
+  font-weight: bold;
+  text-align: center;
+  width: 80%;
+  white-space: nowrap;
+  overflow: hidden;
+  transform: translateY(100vh);
 }
 
 .imageContainer {
-  position: relative; // Required for Next.js Image with fill={true}
+  position: relative;
   flex: 1;
   width: 50%;
   height: 100%;
   order: 2; // Image on right
-  
-  // Next.js Image component styles
-  img {
-    position: absolute !important; // Override Next.js defaults
-    top: 0;
-    left: 0;
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: contain;
-  }
-  
-  .imageItem {
-    opacity: 0; // Default hidden
-    
-    &.firstImage {
-      opacity: 1; // First image visible initially
-    }
-  }
+}
+
+.imageItem {
+  opacity: 0; // Default hidden
+}
+
+.firstImage {
+  opacity: 1; // First image visible initially
+}
+
+// Next.js Image component overrides
+.imageContainer img {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
 }
 
 .errorContainer {
@@ -61,4 +60,57 @@
   font-size: 1.5rem;
   color: red;
   background-color: #f0f0f0;
+}
+
+// Fallback UI styles
+.fallbackContainer {
+  min-height: 100vh;
+  padding: 2rem;
+  background-color: #f9f9f9;
+}
+
+.fallbackContent {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.fallbackMessage {
+  text-align: center;
+  font-size: 1.2rem;
+  margin-bottom: 3rem;
+  color: #666;
+}
+
+.fallbackSection {
+  margin-bottom: 4rem;
+  padding: 2rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  
+  &:nth-child(even) {
+    flex-direction: row-reverse; // Alternate layout
+  }
+}
+
+.fallbackTitle {
+  flex: 1;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+}
+
+.fallbackImageWrapper {
+  flex: 1;
+  max-width: 600px;
+}
+
+.fallbackImage {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
 }
