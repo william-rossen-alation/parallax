@@ -1,0 +1,174 @@
+// Breakpoints
+$mobile-max: 768px;
+$desktop-min: 769px;
+
+// CSS Custom Properties for theming
+.textImageContainer {
+  --text-column-gap: 2rem;
+  --section-spacing: 4rem;
+  --image-border-radius: 8px;
+  --transition-duration: 400ms;
+  --text-max-width: 600px;
+  
+  width: 100%;
+  position: relative;
+}
+
+.content {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  
+  @media (min-width: $desktop-min) {
+    padding: 0 2rem;
+  }
+}
+
+// Mobile Layout (default, mobile-first)
+.mobileLayout {
+  display: block;
+  
+  @media (min-width: $desktop-min) {
+    display: none;
+  }
+}
+
+.mobileSection {
+  margin-bottom: var(--section-spacing);
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.textContent {
+  margin-bottom: 1.5rem;
+}
+
+.imageContent {
+  width: 100%;
+  
+  .image {
+    width: 100%;
+    height: auto;
+    border-radius: var(--image-border-radius);
+    object-fit: cover;
+  }
+}
+
+// Desktop Layout
+.desktopLayout {
+  display: none;
+  
+  @media (min-width: $desktop-min) {
+    display: flex;
+    gap: var(--text-column-gap);
+    align-items: flex-start;
+  }
+}
+
+.textColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--section-spacing);
+  padding-right: 1rem;
+}
+
+.textSection {
+  max-width: var(--text-max-width);
+  min-height: 60vh; // Ensure enough height for scroll triggers
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  
+  &:first-child {
+    margin-top: 2rem;
+  }
+  
+  &:last-child {
+    margin-bottom: 2rem;
+  }
+}
+
+.imageColumn {
+  position: relative;
+  padding-left: 1rem;
+}
+
+.stickyImageContainer {
+  position: sticky;
+  top: 2rem; // Align with the top margin of first text section
+  width: 100%;
+  aspect-ratio: 16/9; // Default aspect ratio, will be overridden
+  overflow: hidden;
+  border-radius: var(--image-border-radius);
+  background-color: #f5f5f5; // Placeholder while images load
+}
+
+.stickyImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity var(--transition-duration) ease-in-out;
+  
+  &.active {
+    opacity: 1;
+  }
+}
+
+// Typography
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  color: #1a1a1a;
+  
+  @media (min-width: $desktop-min) {
+    font-size: 2.5rem;
+  }
+}
+
+.description {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: #4a4a4a;
+  margin: 0;
+  
+  @media (min-width: $desktop-min) {
+    font-size: 1.25rem;
+  }
+}
+
+// Utility classes for aspect ratios
+.aspectRatio16x9 {
+  aspect-ratio: 16/9;
+}
+
+.aspectRatio4x3 {
+  aspect-ratio: 4/3;
+}
+
+.aspectRatio1x1 {
+  aspect-ratio: 1/1;
+}
+
+.aspectRatio3x2 {
+  aspect-ratio: 3/2;
+}
+
+// Animation preferences
+@media (prefers-reduced-motion: reduce) {
+  .stickyImage {
+    transition: none;
+  }
+  
+  .textImageContainer {
+    --transition-duration: 0ms;
+  }
+}
