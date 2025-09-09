@@ -30,9 +30,17 @@ export default function TextImagePage() {
   return (
     <>
       <Spacer className={styles.lightOrange}/>
+      <div style={{ padding: '2rem 0' }}>
+        <h1 style={{ textAlign: 'center', marginBottom: '3rem', fontSize: '2.5rem' }}>
+          TextImage Component Demo
+        </h1>
+        <h2 style={{ textAlign: 'center', marginBottom: '2rem', color: '#666' }}>
+          Aspect Ratio: 4:3 | Column Ratio: 45:55
+        </h2>
+      </div>
       <TextImage 
         sections={sampleSections}
-        aspectRatio="16:9"
+        aspectRatio="4:3"
         columnRatio={[45, 55]}
       />
       <Spacer className={styles.lightOrange}/>

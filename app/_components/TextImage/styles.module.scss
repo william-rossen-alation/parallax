@@ -100,10 +100,21 @@ $desktop-min: 769px;
   position: sticky;
   top: 2rem; // Align with the top margin of first text section
   width: 100%;
-  aspect-ratio: 16/9; // Default aspect ratio, will be overridden
+  // aspect-ratio set dynamically via inline styles
   overflow: hidden;
   border-radius: var(--image-border-radius);
   background-color: #f5f5f5; // Placeholder while images load
+  transition: opacity 300ms ease-in-out;
+}
+
+.loadingPlaceholder {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #888;
+  font-size: 0.875rem;
+  z-index: 1;
 }
 
 .stickyImage {

@@ -1,4 +1,26 @@
+'use client';
+
+import Image from 'next/image';
+import { useState, useEffect, useMemo } from 'react';
 import styles from './styles.module.scss';
+
+// Utility functions for aspect ratio calculations
+export const parseAspectRatio = (aspectRatio: string): { width: number; height: number } => {
+  const parts = aspectRatio.split(':').map(Number);
+  if (parts.length !== 2 || parts.some(isNaN)) {
+    throw new Error(`Invalid aspect ratio format: ${aspectRatio}. Use format like "16:9" or "4:3"`);
+  }
+  return { width: parts[0], height: parts[1] };
+};
+
+export const calculateAspectRatio = (width: number, height: number): number => {
+  return width / height;
+};
+
+export const getAspectRatioClass = (aspectRatio: string): string => {
+  const normalized = aspectRatio.replace(':', 'x');
+  return `aspectRatio${normalized}`;
+};
 
 // TypeScript interfaces
 export interface TextImageSection {
@@ -31,6 +53,44 @@ export const TextImage: React.FC<TextImageProps> = ({
   transitionDuration = defaultProps.transitionDuration,
   className,
 }) => {
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
+
+  // Calculate aspect ratio values
+  const aspectRatioData = useMemo(() => {
+    if (!aspectRatio) return null;
+    try {
+      const { width, height } = parseAspectRatio(aspectRatio);
+      return {
+        ratio: calculateAspectRatio(width, height),
+        cssValue: `${width}/${height}`,
+        className: getAspectRatioClass(aspectRatio)
+      };
+    } catch (error: unknown) {
+      console.warn('Invalid aspect ratio, falling back to auto:', error);
+      return null;
+    }
+  }, [aspectRatio]);
+
+  // Preload all images
+  useEffect(() => {
+    const imagePromises = sections.map((section) => {
+      return new Promise<void>((resolve, reject) => {
+        const img = new window.Image();
+        img.onload = () => resolve();
+        img.onerror = reject;
+        img.src = section.imageUrl;
+      });
+    });
+
+    Promise.all(imagePromises)
+      .then(() => setImagesLoaded(true))
+      .catch((error: unknown) => {
+        console.warn('Some images failed to preload:', error);
+        setImagesLoaded(true); // Continue anyway
+      });
+  }, [sections]);
+
   return (
     <section className={`${styles.textImageContainer} ${className || ''}`}>
       <div className={styles.content}>
@@ -43,10 +103,14 @@ export const TextImage: React.FC<TextImageProps> = ({
                 <p className={styles.description}>{section.content}</p>
               </div>
               <div className={styles.imageContent}>
-                <img 
-                  src={section.imageUrl} 
+                <Image
+                  src={section.imageUrl}
                   alt={section.imageAlt}
+                  width={800}
+                  height={aspectRatioData ? Math.round(800 / aspectRatioData.ratio) : 450}
                   className={styles.image}
+                  priority={index === 0} // Prioritize first image
+                  sizes="(max-width: 768px) 100vw, 50vw"
                 />
               </div>
             </div>
@@ -71,14 +135,32 @@ export const TextImage: React.FC<TextImageProps> = ({
             className={styles.imageColumn}
             style={{ flex: columnRatio ? columnRatio[1] : 50 }}
           >
-            <div className={styles.stickyImageContainer}>
+            <div 
+              className={styles.stickyImageContainer}
+              style={{
+                aspectRatio: aspectRatioData?.cssValue || '16/9',
+                opacity: imagesLoaded ? 1 : 0.7
+              }}
+            >
+              {!imagesLoaded && (
+                <div className={styles.loadingPlaceholder}>
+                  Loading images...
+                </div>
+              )}
               {sections.map((section, index) => (
-                <img
+                <Image
                   key={section.id}
                   src={section.imageUrl}
                   alt={section.imageAlt}
-                  className={`${styles.stickyImage} ${index === 0 ? styles.active : ''}`}
+                  fill
+                  className={`${styles.stickyImage} ${index === activeImageIndex ? styles.active : ''}`}
                   data-section-id={section.id}
+                  priority={index === 0}
+                  sizes="(max-width: 768px) 0vw, 50vw"
+                  style={{
+                    objectFit: 'cover',
+                    transition: `opacity ${transitionDuration}ms ease-in-out`
+                  }}
                 />
               ))}
             </div>
