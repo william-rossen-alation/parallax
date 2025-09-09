@@ -39,14 +39,9 @@ const MasterTextImage = ({ data, scrollDistancePerSection = DEFAULTS.SCROLL_DIST
       scrollTrigger: {
         trigger: containerRef.current,
         start: "top top",
-        end: `+=${numSections * scrollDistancePerSection}vh`, // Configurable scroll distance
+        end: `+=${numSections * scrollDistancePerSection}vh`,
         pin: true,
-        scrub: prefersReducedMotion ? false : 1, // Respect reduced motion preference
-        // markers: true, // Disabled for production
-        onUpdate: (self) => {
-          // Optional: Enable for debugging
-          // console.log('Scroll progress:', self.progress);
-        }
+        scrub: prefersReducedMotion ? false : 1
       }
     });
     
@@ -84,43 +79,30 @@ const MasterTextImage = ({ data, scrollDistancePerSection = DEFAULTS.SCROLL_DIST
 
   const createTextAnimations = (data, masterTimeline, sectionDuration, transitionDuration, textRefs) => {
     data.forEach((item, index) => {
-      // Calculate timing for this section
       const sectionStart = index * sectionDuration;
-      const sectionEnd = sectionStart + sectionDuration;
       
-      // TEXT ANIMATIONS
-      // Set initial position (start from bottom of viewport)
+      // Set initial position and create smooth bottom-to-top animation
       gsap.set(textRefs.current[index], { y: "100vh" });
       
-      // Single continuous animation: bottom → center → top
-      // This spans the entire section duration for smooth, consistent movement
       masterTimeline.to(textRefs.current[index], {
-        y: "-100vh", // Move from 100vh to -100vh (bottom to top)
-        duration: sectionDuration, // Use full section duration
-        ease: "none" // Linear movement to match scroll speed
+        y: "-100vh",
+        duration: sectionDuration,
+        ease: "none"
       }, sectionStart);
     });
   };
 
   // Initial mobile detection (once on page load only)
   useEffect(() => {
-    const checkMobile = () => {
-      if (typeof window !== 'undefined') {
-        const isMobileDevice = window.matchMedia('(max-width: 768px)').matches;
-        setIsMobile(isMobileDevice);
-        console.log('Initial mobile detection:', isMobileDevice ? 'Mobile' : 'Desktop');
-      }
-    };
-    
-    checkMobile();
-    // NO resize listener - detection happens only once on mount!
-  }, []); // Empty dependency array - runs once on mount
+    if (typeof window !== 'undefined') {
+      setIsMobile(window.matchMedia('(max-width: 768px)').matches);
+    }
+  }, []);
 
   // Initialize scroll-triggered animations (desktop only)
   useEffect(() => {
     // Skip GSAP initialization on mobile
     if (isMobile) {
-      console.log('Mobile detected - skipping GSAP initialization');
       return;
     }
     if (!validateDataLength(data)) {
@@ -132,22 +114,21 @@ const MasterTextImage = ({ data, scrollDistancePerSection = DEFAULTS.SCROLL_DIST
       console.warn(`${data.length} sections may impact performance. Consider splitting into multiple components.`);
     }
 
+    const validateRefs = () => {
+      const allRefsValid = imageRefs.current.every(ref => ref !== null) && 
+                          textRefs.current.every(ref => ref !== null);
+      if (!allRefsValid) {
+        console.warn('Not all refs are initialized yet');
+        return false;
+      }
+      return true;
+    };
+
     const initializeAnimations = () => {
       try {
-        if (typeof gsap === 'undefined') {
-          throw new Error('GSAP library not loaded');
-        }
-        
         gsap.registerPlugin(ScrollTrigger);
         
-        // Wait for all refs to be initialized
-        if (!imageRefs.current.every(ref => ref !== null)) {
-          console.warn('Not all image refs are initialized yet');
-          return;
-        }
-        
-        if (!textRefs.current.every(ref => ref !== null)) {
-          console.warn('Not all text refs are initialized yet');
+        if (!validateRefs()) {
           return;
         }
         
@@ -158,8 +139,6 @@ const MasterTextImage = ({ data, scrollDistancePerSection = DEFAULTS.SCROLL_DIST
         createImageAnimations(data, masterTimeline, sectionDuration, transitionDuration, imageRefs);
         createTextAnimations(data, masterTimeline, sectionDuration, transitionDuration, textRefs);
         
-        // console.log('Phase 4: Optimized animations initialized'); // Debug log
-        
       } catch (error) {
         console.error('Failed to initialize animations:', error);
         setHasError(true);
@@ -167,7 +146,6 @@ const MasterTextImage = ({ data, scrollDistancePerSection = DEFAULTS.SCROLL_DIST
     };
 
     // Initialize animations after a small delay to ensure refs are populated
-    // Note: Next.js handles image optimization and preloading automatically
     const timeoutId = setTimeout(() => {
       initializeAnimations();
     }, DEFAULTS.INITIALIZATION_DELAY);
