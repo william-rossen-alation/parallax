@@ -14,6 +14,17 @@
   align-items: center;
   justify-content: center;
   order: 1; // Text on left
+  
+  .textItem {
+    position: absolute;
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+    width: 80%; // Prevent text from touching edges
+    white-space: nowrap; // Prevent wrapping during animation
+    overflow: hidden; // Hide overflow during animation
+    transform: translateY(100vh); // Initially position off-screen (before GSAP takes over)
+  }
 }
 
 .imageContainer {
@@ -30,19 +41,15 @@
     left: 0;
     width: 100% !important;
     height: 100% !important;
+    object-fit: contain;
   }
-}
-
-.textContainer {
-  .textItem {
-    position: absolute;
-    font-size: 2rem;
-    font-weight: bold;
-    text-align: center;
-    width: 80%; // Prevent text from touching edges
-    white-space: nowrap; // Prevent wrapping during animation
-    overflow: hidden; // Hide overflow during animation
-    transform: translateY(100vh); // Initially position off-screen (before GSAP takes over)
+  
+  .imageItem {
+    opacity: 0; // Default hidden
+    
+    &.firstImage {
+      opacity: 1; // First image visible initially
+    }
   }
 }
 

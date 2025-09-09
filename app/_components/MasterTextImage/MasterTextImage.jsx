@@ -6,7 +6,14 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Image from 'next/image';
 import styles from './MasterTextImage.module.scss';
 
-const MasterTextImage = ({ data }) => {
+// Constants
+const DEFAULTS = {
+  TRANSITION_DURATION: 0.05, // 5% of section duration for image crossfades
+  INITIALIZATION_DELAY: 100, // ms delay for refs to populate
+  SCROLL_DISTANCE_PER_SECTION: 400 // vh per section
+};
+
+const MasterTextImage = ({ data, scrollDistancePerSection = DEFAULTS.SCROLL_DISTANCE_PER_SECTION }) => {
   const containerRef = useRef(null);
   const imageRefs = useRef(new Array(data.length).fill(null));
   const textRefs = useRef(new Array(data.length).fill(null));
@@ -14,47 +21,20 @@ const MasterTextImage = ({ data }) => {
 
   // Validation function
   const validateDataLength = (data) => {
-    if (!Array.isArray(data) || data.length === 0) {
-      console.error('Data must be a non-empty array');
-      return false;
-    }
-    
-    if (data.length < 2) {
-      console.warn('Minimum 2 sections required for smooth transitions');
-      return false;
-    }
-    
-    if (data.length > 12) {
-      console.error('More than 12 sections will likely cause performance issues');
-      return false;
-    }
-    
-    const isValidStructure = data.every(item => 
-      item && 
-      typeof item.image === 'string' && 
-      typeof item.firstTitle === 'string'
-    );
-    
-    if (!isValidStructure) {
-      console.error('Invalid data structure: each item must have image and firstTitle strings');
-      return false;
-    }
-    
-    return true;
+    return Array.isArray(data) && data.length > 0;
   };
 
   // GSAP Timeline Functions
   const createDynamicTimeline = (data, containerRef) => {
     const numSections = data.length;
-    const transitionDuration = 0.05; // 5%
+    const transitionDuration = DEFAULTS.TRANSITION_DURATION;
     const sectionDuration = (1 - (numSections - 1) * transitionDuration) / numSections;
     
     const masterTimeline = gsap.timeline({
       scrollTrigger: {
         trigger: containerRef.current,
         start: "top top",
-        end: `+=${numSections * 10000}vh`, // Optimized scroll distance (400vh per section)
-        // end: `+=${numSections * 400}vh`, // Optimized scroll distance (400vh per section)
+        end: `+=${numSections * scrollDistancePerSection}vh`, // Configurable scroll distance
         pin: true,
         scrub: 1,
         // markers: true, // Disabled for production
@@ -63,15 +43,6 @@ const MasterTextImage = ({ data }) => {
           // console.log('Scroll progress:', self.progress);
         }
       }
-    });
-
-    // Dynamic timeline labels
-    data.forEach((_, index) => {
-      const sectionStart = index * sectionDuration;
-      const sectionEnd = sectionStart + sectionDuration;
-      
-      masterTimeline.addLabel(`section${index + 1}Start`, sectionStart)
-                    .addLabel(`section${index + 1}End`, sectionEnd);
     });
     
     return { masterTimeline, sectionDuration, transitionDuration };
@@ -153,17 +124,6 @@ const MasterTextImage = ({ data }) => {
         
         const { masterTimeline, sectionDuration, transitionDuration } = createDynamicTimeline(data, containerRef);
         masterTimelineRef.current = masterTimeline;
-        
-        // Apply GPU acceleration for better performance
-        gsap.set(imageRefs.current, {
-          force3D: true,
-          willChange: "opacity"
-        });
-        
-        gsap.set(textRefs.current, {
-          force3D: true,
-          willChange: "transform"
-        });
 
         // Create both image and text animations
         createImageAnimations(data, masterTimeline, sectionDuration, transitionDuration, imageRefs);
@@ -180,7 +140,7 @@ const MasterTextImage = ({ data }) => {
     // Note: Next.js handles image optimization and preloading automatically
     const timeoutId = setTimeout(() => {
       initializeAnimations();
-    }, 100);
+    }, DEFAULTS.INITIALIZATION_DELAY);
 
     // Cleanup function
     return () => {
@@ -199,7 +159,7 @@ const MasterTextImage = ({ data }) => {
         console.warn('Error during cleanup:', error);
       }
     };
-  }, [data]);
+  }, [data, scrollDistancePerSection]);
 
   if (!validateDataLength(data)) {
     return <div className={styles.errorContainer}>Invalid data provided</div>;
@@ -216,10 +176,7 @@ const MasterTextImage = ({ data }) => {
             src={item.image} 
             fill={true}
             sizes="(max-width: 768px) 100vw, 50vw"
-            style={{ 
-              opacity: index === 0 ? 1 : 0, // Only show first image initially
-              objectFit: 'contain' 
-            }}
+            className={`${styles.imageItem} ${index === 0 ? styles.firstImage : ''}`}
             alt={item.firstTitle}
           />
         ))}
@@ -232,9 +189,6 @@ const MasterTextImage = ({ data }) => {
             key={`text-${index}`}
             ref={el => textRefs.current[index] = el}
             className={styles.textItem}
-            style={{ 
-              opacity: 1 // Let GSAP animations control visibility via transforms
-            }}
           >
             {item.firstTitle}
           </div>

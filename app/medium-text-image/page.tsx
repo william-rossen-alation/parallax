@@ -23,7 +23,7 @@ export default function MediumTextImage() {
     <>
       <Spacer className={styles.lightOrange}/>
       <SmoothScrolling>
-        <MasterTextImage data={tempData} />
+        <MasterTextImage data={tempData} scrollDistancePerSection={10000} />
       </SmoothScrolling>
       <Spacer className={styles.lightOrange}/>
     </>
