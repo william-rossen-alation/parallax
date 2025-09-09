@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import styles from './styles.module.scss';
 
 // Utility functions for aspect ratio calculations
@@ -20,6 +20,115 @@ export const calculateAspectRatio = (width: number, height: number): number => {
 export const getAspectRatioClass = (aspectRatio: string): string => {
   const normalized = aspectRatio.replace(':', 'x');
   return `aspectRatio${normalized}`;
+};
+
+// Custom hook for scroll-based image transitions
+interface ScrollTriggerOptions {
+  threshold?: number;
+  rootMargin?: string;
+}
+
+interface ScrollTriggerReturn {
+  activeIndex: number;
+  registerSection: (element: HTMLElement | null, index: number) => void;
+  unregisterSection: (index: number) => void;
+}
+
+const useScrollTrigger = (
+  sectionsCount: number, 
+  options: ScrollTriggerOptions = {}
+): ScrollTriggerReturn => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('down');
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const sectionsRef = useRef<Map<number, HTMLElement>>(new Map());
+  const lastScrollY = useRef(0);
+
+  const { threshold = 0.5, rootMargin = '-20% 0px -20% 0px' } = options;
+
+  // Track scroll direction
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY.current) {
+        setScrollDirection('down');
+      } else if (currentScrollY < lastScrollY.current) {
+        setScrollDirection('up');
+      }
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Intersection Observer callback
+  const handleIntersection = useCallback((entries: IntersectionObserverEntry[]) => {
+    entries.forEach((entry) => {
+      const element = entry.target as HTMLElement;
+      const sectionIndex = parseInt(element.dataset.sectionIndex || '0', 10);
+
+      if (entry.isIntersecting) {
+        // Different logic based on scroll direction
+        if (scrollDirection === 'down') {
+          // When scrolling down, activate when section enters from bottom
+          if (entry.boundingClientRect.top < window.innerHeight * 0.6) {
+            setActiveIndex(sectionIndex);
+          }
+        } else {
+          // When scrolling up, activate when section enters from top
+          if (entry.boundingClientRect.top > window.innerHeight * 0.2) {
+            setActiveIndex(sectionIndex);
+          }
+        }
+      }
+    });
+  }, [scrollDirection]);
+
+  // Register a section for observation
+  const registerSection = useCallback((element: HTMLElement | null, index: number) => {
+    if (!element) return;
+
+    // Store element reference
+    sectionsRef.current.set(index, element);
+    element.dataset.sectionIndex = index.toString();
+
+    // Create observer if it doesn't exist
+    if (!observerRef.current) {
+      observerRef.current = new IntersectionObserver(handleIntersection, {
+        threshold,
+        rootMargin,
+      });
+    }
+
+    // Start observing
+    observerRef.current.observe(element);
+  }, [handleIntersection, threshold, rootMargin]);
+
+  // Unregister a section
+  const unregisterSection = useCallback((index: number) => {
+    const element = sectionsRef.current.get(index);
+    if (element && observerRef.current) {
+      observerRef.current.unobserve(element);
+      sectionsRef.current.delete(index);
+    }
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+      sectionsRef.current.clear();
+    };
+  }, []);
+
+  return {
+    activeIndex,
+    registerSection,
+    unregisterSection,
+  };
 };
 
 // TypeScript interfaces
@@ -53,8 +162,92 @@ export const TextImage: React.FC<TextImageProps> = ({
   transitionDuration = defaultProps.transitionDuration,
   className,
 }) => {
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [imagesLoaded, setImagesLoaded] = useState(false);
+  
+  // Use our custom scroll trigger hook with enhanced settings
+  const { activeIndex: activeImageIndex, registerSection } = useScrollTrigger(
+    sections.length,
+    {
+      threshold: 0.2, // More sensitive to section changes
+      rootMargin: '-20% 0px -20% 0px' // Balanced trigger zones
+    }
+  );
+
+  // State for smooth transitions
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // State for dynamic sticky positioning
+  const [stickyOffset, setStickyOffset] = useState(32); // Default 2rem
+  const imageContainerRef = useRef<HTMLDivElement>(null);
+
+  // Handle smooth transitions between image changes
+  useEffect(() => {
+    // Clear any existing transition timeout
+    if (transitionTimeoutRef.current) {
+      clearTimeout(transitionTimeoutRef.current);
+    }
+
+    // Set transitioning state
+    setIsTransitioning(true);
+
+    // Clear transitioning state after transition completes
+    transitionTimeoutRef.current = setTimeout(() => {
+      setIsTransitioning(false);
+    }, transitionDuration);
+
+    return () => {
+      if (transitionTimeoutRef.current) {
+        clearTimeout(transitionTimeoutRef.current);
+      }
+    };
+  }, [activeImageIndex, transitionDuration]);
+
+  // Calculate optimal sticky offset based on viewport and content
+  useEffect(() => {
+    const calculateStickyOffset = () => {
+      const viewportHeight = window.innerHeight;
+      const textColumnElement = document.querySelector(`.${styles.textColumn}`) as HTMLElement;
+      
+      if (textColumnElement && imageContainerRef.current) {
+        const textRect = textColumnElement.getBoundingClientRect();
+        const imageRect = imageContainerRef.current.getBoundingClientRect();
+        
+        // Calculate offset to center image container vertically within the text content area
+        const textCenterY = textRect.top + (textRect.height / 2);
+        const imageCenterY = imageRect.height / 2;
+        const optimalOffset = Math.max(16, textCenterY - imageCenterY);
+        
+        setStickyOffset(Math.min(optimalOffset, viewportHeight * 0.3)); // Max 30% of viewport
+      }
+    };
+
+    // Calculate on mount and resize
+    calculateStickyOffset();
+    
+    // Debounced resize handler
+    let resizeTimeout: NodeJS.Timeout;
+    const debouncedResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(calculateStickyOffset, 100);
+    };
+    
+    window.addEventListener('resize', debouncedResize);
+    
+    return () => {
+      window.removeEventListener('resize', debouncedResize);
+      clearTimeout(resizeTimeout);
+    };
+  }, [sections.length, imagesLoaded]);
+
+  // Ref callback to register text sections with intersection observer
+  const createSectionRef = useCallback((index: number) => {
+    return (element: HTMLElement | null) => {
+      if (element) {
+        registerSection(element, index);
+      }
+    };
+  }, [registerSection]);
 
   // Calculate aspect ratio values
   const aspectRatioData = useMemo(() => {
@@ -121,10 +314,15 @@ export const TextImage: React.FC<TextImageProps> = ({
         <div className={styles.desktopLayout}>
           <div 
             className={styles.textColumn}
-            style={{ flex: columnRatio ? columnRatio[0] : 50 }}
+            style={{ flexBasis: `${columnRatio ? columnRatio[0] : 50}%` }}
           >
             {sections.map((section, index) => (
-              <div key={section.id} className={styles.textSection} data-section-id={section.id}>
+              <div 
+                key={section.id} 
+                ref={createSectionRef(index)}
+                className={`${styles.textSection} ${index === activeImageIndex ? styles.activeSection : ''}`} 
+                data-section-id={section.id}
+              >
                 <h2 className={styles.title}>{section.title}</h2>
                 <p className={styles.description}>{section.content}</p>
               </div>
@@ -133,26 +331,39 @@ export const TextImage: React.FC<TextImageProps> = ({
           
           <div 
             className={styles.imageColumn}
-            style={{ flex: columnRatio ? columnRatio[1] : 50 }}
+            style={{ flexBasis: `${columnRatio ? columnRatio[1] : 50}%` }}
           >
             <div 
-              className={styles.stickyImageContainer}
+              ref={imageContainerRef}
+              className={`${styles.stickyImageContainer} ${isTransitioning ? styles.transitioning : ''}`}
               style={{
+                position: 'sticky',
+                top: '100px', // Fixed for testing
                 aspectRatio: aspectRatioData?.cssValue || '16/9',
-                opacity: imagesLoaded ? 1 : 0.7
-              }}
+                opacity: imagesLoaded ? 1 : 0.7,
+                '--transition-duration': `${transitionDuration}ms`
+              } as React.CSSProperties & { '--transition-duration': string }}
             >
               {!imagesLoaded && (
                 <div className={styles.loadingPlaceholder}>
                   Loading images...
                 </div>
               )}
+              
+              {/* Debug indicator - remove in production */}
+              <div className={styles.debugIndicator}>
+                <div>Active: {activeImageIndex + 1} / {sections.length}</div>
+                <div>Transition: {isTransitioning ? 'Active' : 'Idle'}</div>
+                <div>Offset: {Math.round(stickyOffset)}px</div>
+                <div>Position: sticky</div>
+              </div>
               {sections.map((section, index) => (
                 <Image
                   key={section.id}
                   src={section.imageUrl}
                   alt={section.imageAlt}
-                  fill
+                  width={600}
+                  height={aspectRatioData ? Math.round(600 / aspectRatioData.ratio) : 400}
                   className={`${styles.stickyImage} ${index === activeImageIndex ? styles.active : ''}`}
                   data-section-id={section.id}
                   priority={index === 0}

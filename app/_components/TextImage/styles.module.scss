@@ -12,6 +12,7 @@ $desktop-min: 769px;
   
   width: 100%;
   position: relative;
+  overflow: visible; // Ensure sticky elements can work
 }
 
 .content {
@@ -19,6 +20,7 @@ $desktop-min: 769px;
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1rem;
+  overflow: visible; // Ensure sticky positioning works
   
   @media (min-width: $desktop-min) {
     padding: 0 2rem;
@@ -64,7 +66,11 @@ $desktop-min: 769px;
   @media (min-width: $desktop-min) {
     display: flex;
     gap: var(--text-column-gap);
-    align-items: flex-start;
+    align-items: stretch; // Make both columns fill available height
+    position: relative; // Establish stacking context for sticky
+    overflow: visible; // Ensure sticky elements can move
+    min-height: 300vh; // Force minimum height based on 3 sections at 100vh each
+    background: linear-gradient(to bottom, red 1px, transparent 1px); // Debug: show if height exists
   }
 }
 
@@ -73,14 +79,16 @@ $desktop-min: 769px;
   flex-direction: column;
   gap: var(--section-spacing);
   padding-right: 1rem;
+  flex: 0 0 auto; // Don't grow/shrink, use flexBasis from inline styles
 }
 
 .textSection {
   max-width: var(--text-max-width);
-  min-height: 60vh; // Ensure enough height for scroll triggers
+  min-height: 100vh; // Much larger height to create proper scrollable content
   display: flex;
   flex-direction: column;
   justify-content: center;
+  transition: all 300ms ease-in-out;
   
   &:first-child {
     margin-top: 2rem;
@@ -89,22 +97,57 @@ $desktop-min: 769px;
   &:last-child {
     margin-bottom: 2rem;
   }
+  
+  &.activeSection {
+    transform: translateX(10px);
+    
+    .title {
+      color: #0066cc;
+    }
+    
+    .description {
+      color: #333;
+    }
+  }
 }
 
 .imageColumn {
   position: relative;
   padding-left: 1rem;
+  flex: 0 0 auto; // Don't grow/shrink, use flexBasis from inline styles
+  align-self: stretch; // Stretch to match the height of the flex container
+  background: linear-gradient(to bottom, blue 1px, transparent 1px); // Debug: show column height
+  border: 2px solid green; // Debug: show column boundaries
+}
+
+.stickyImageWrapper {
+  position: sticky;
+  top: 2rem; // Default fallback, overridden by dynamic calculation
+  width: 100%;
+  height: fit-content; // Important for sticky behavior
+  transition: top 200ms ease-out;
+  will-change: top; // GPU acceleration hint
+  z-index: 1; // Ensure proper stacking
 }
 
 .stickyImageContainer {
-  position: sticky;
-  top: 2rem; // Align with the top margin of first text section
+  position: relative; // Required for Next.js Image fill prop AND overridden by inline sticky
   width: 100%;
   // aspect-ratio set dynamically via inline styles
   overflow: hidden;
   border-radius: var(--image-border-radius);
   background-color: #f5f5f5; // Placeholder while images load
-  transition: opacity 300ms ease-in-out;
+  transition: opacity 300ms ease-in-out, top 200ms ease-out;
+  will-change: opacity, top;
+  z-index: 1;
+  
+  // Use CSS custom property for transition duration
+  --transition-duration: 400ms;
+  
+  &.transitioning {
+    // Subtle visual feedback during transitions
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
 }
 
 .loadingPlaceholder {
@@ -117,6 +160,29 @@ $desktop-min: 769px;
   z-index: 1;
 }
 
+.debugIndicator {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-family: monospace;
+  line-height: 1.4;
+  z-index: 10;
+  min-width: 140px;
+  
+  div {
+    margin: 0;
+    
+    &:not(:last-child) {
+      margin-bottom: 0.25rem;
+    }
+  }
+}
+
 .stickyImage {
   position: absolute;
   top: 0;
@@ -125,9 +191,16 @@ $desktop-min: 769px;
   height: 100%;
   object-fit: cover;
   opacity: 0;
-  transition: opacity var(--transition-duration) ease-in-out;
+  transform: translateZ(0); // Force GPU acceleration
+  transition: opacity var(--transition-duration) cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity;
   
   &.active {
+    opacity: 1;
+  }
+  
+  // Smooth entrance for the first image
+  &:first-child {
     opacity: 1;
   }
 }
