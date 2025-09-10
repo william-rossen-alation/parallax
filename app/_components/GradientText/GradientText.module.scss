@@ -1,0 +1,96 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.text {
+  font-size: 3rem;
+  font-weight: bold;
+  display: inline-block;
+  white-space: pre; /* preserve spaces */
+  margin: 0;
+  line-height: 1.2;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.5rem;
+  }
+}
+
+.letter {
+  display: inline-block;
+  -webkit-text-fill-color: black; /* start black - this overrides the gradient initially */
+  color: black; /* fallback for non-webkit browsers */
+  transition: -webkit-text-fill-color 1s ease, color 1s ease;
+}
+
+.letter.active {
+  -webkit-text-fill-color: transparent; /* reveal gradient */
+  color: transparent;
+}
+
+.buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+.button {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #ff7b00, #ff9500);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(255, 123, 0, 0.3);
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(255, 123, 0, 0.4);
+    background: linear-gradient(135deg, #ff8500, #ffa500);
+  }
+  
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(255, 123, 0, 0.3);
+  }
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 123, 0, 0.5);
+  }
+}
+
+/* Enhanced gradient variations for different effects */
+.letter[data-gradient="rainbow"] {
+  background: linear-gradient(to right, 
+    #ff0000, #ff8000, #ffff00, #80ff00, 
+    #00ff00, #00ff80, #00ffff, #0080ff, 
+    #0000ff, #8000ff, #ff00ff, #ff0080
+  );
+}
+
+.letter[data-gradient="sunset"] {
+  background: linear-gradient(to right, #ff4e50, #fc913a, #f9d423);
+}
+
+.letter[data-gradient="ocean"] {
+  background: linear-gradient(to right, #667eea, #764ba2);
+}
+
+.letter[data-gradient="forest"] {
+  background: linear-gradient(to right, #11998e, #38ef7d);
+}
