@@ -113,6 +113,7 @@ export interface TextImageProps {
   columnRatio?: [number, number]; // e.g., [50, 50] or [40, 60]
   transitionDuration?: number; // milliseconds, default 400
   className?: string;
+  showDebug?: boolean; // Show debug indicator, default false for production
 }
 
 // Default props
@@ -120,6 +121,7 @@ const defaultProps: Partial<TextImageProps> = {
   aspectRatio: '16:9',
   columnRatio: [50, 50],
   transitionDuration: 400,
+  showDebug: process.env.NODE_ENV === 'development', // Auto-enable in development
 };
 
 export const TextImage: React.FC<TextImageProps> = ({
@@ -128,6 +130,7 @@ export const TextImage: React.FC<TextImageProps> = ({
   columnRatio = defaultProps.columnRatio,
   transitionDuration = defaultProps.transitionDuration,
   className,
+  showDebug = defaultProps.showDebug,
 }) => {
   const imagesLoaded = true; // Simplified - Next.js Image handles loading
   
@@ -225,14 +228,16 @@ export const TextImage: React.FC<TextImageProps> = ({
               } as React.CSSProperties & { '--transition-duration': string }}
             >
               
-              {/* Debug indicator - remove in production */}
-              <div className={styles.debugIndicator}>
-                <div>Active: {activeImageIndex + 1} / {sections.length}</div>
-                <div>Sections: {sections.length}</div>
-                <div>Container: {sections.length * 100}vh</div>
-                <div>Offset: 2rem</div>
-                <div>Position: sticky</div>
-              </div>
+              {/* Debug indicator - controlled by showDebug prop */}
+              {showDebug && (
+                <div className={styles.debugIndicator}>
+                  <div>Active: {activeImageIndex + 1} / {sections.length}</div>
+                  <div>Sections: {sections.length}</div>
+                  <div>Container: {sections.length * 100}vh</div>
+                  <div>Offset: 2rem</div>
+                  <div>Position: sticky</div>
+                </div>
+              )}
               {sections.map((section, index) => (
                 <Image
                   key={section.id}

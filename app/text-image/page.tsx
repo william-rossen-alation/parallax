@@ -59,6 +59,7 @@ export default function TextImagePage() {
         sections={sampleSections}
         aspectRatio="4:3"
         columnRatio={[45, 55]}
+        showDebug={true} // Enable debug for development
       />
       <Spacer className={styles.lightOrange}/>
     </>
