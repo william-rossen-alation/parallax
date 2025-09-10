@@ -160,6 +160,12 @@ export const TextImage: React.FC<TextImageProps> = ({
   // Get aspect ratio values
   const aspectRatioData = useMemo(() => getAspectRatio(aspectRatio), [aspectRatio]);
 
+  // Calculate the top value that centers the image in viewport
+  const stickyTop = useMemo(() => {
+    const imageHeight = 600 / aspectRatioData.ratio; // Using current image dimensions
+    return `calc(50vh - ${imageHeight / 2}px)`;
+  }, [aspectRatioData.ratio]);
+
 
   return (
     <section className={`${styles.textImageContainer} ${className || ''}`}>
@@ -221,7 +227,7 @@ export const TextImage: React.FC<TextImageProps> = ({
               className={styles.stickyImageContainer}
               style={{
                 position: 'sticky',
-                top: '2rem', // Simple fixed offset
+                top: stickyTop, // Viewport-centered positioning
                 aspectRatio: aspectRatioData.cssValue,
                 opacity: imagesLoaded ? 1 : 0.7,
                 '--transition-duration': `${transitionDuration}ms`
@@ -234,8 +240,8 @@ export const TextImage: React.FC<TextImageProps> = ({
                   <div>Active: {activeImageIndex + 1} / {sections.length}</div>
                   <div>Sections: {sections.length}</div>
                   <div>Container: {sections.length * 100}vh</div>
-                  <div>Offset: 2rem</div>
-                  <div>Position: sticky</div>
+                  <div>Top: {stickyTop}</div>
+                  <div>Position: sticky (viewport-centered)</div>
                 </div>
               )}
               {sections.map((section, index) => (
