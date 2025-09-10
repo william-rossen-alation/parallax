@@ -17,10 +17,6 @@ export const calculateAspectRatio = (width: number, height: number): number => {
   return width / height;
 };
 
-export const getAspectRatioClass = (aspectRatio: string): string => {
-  const normalized = aspectRatio.replace(':', 'x');
-  return `aspectRatio${normalized}`;
-};
 
 // Custom hook for scroll-based image transitions
 interface ScrollTriggerOptions {
@@ -31,7 +27,6 @@ interface ScrollTriggerOptions {
 interface ScrollTriggerReturn {
   activeIndex: number;
   registerSection: (element: HTMLElement | null, index: number) => void;
-  unregisterSection: (index: number) => void;
 }
 
 const useScrollTrigger = (
@@ -39,28 +34,10 @@ const useScrollTrigger = (
   options: ScrollTriggerOptions = {}
 ): ScrollTriggerReturn => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('down');
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sectionsRef = useRef<Map<number, HTMLElement>>(new Map());
-  const lastScrollY = useRef(0);
 
   const { threshold = 0.5, rootMargin = '-20% 0px -20% 0px' } = options;
-
-  // Track scroll direction
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY > lastScrollY.current) {
-        setScrollDirection('down');
-      } else if (currentScrollY < lastScrollY.current) {
-        setScrollDirection('up');
-      }
-      lastScrollY.current = currentScrollY;
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Intersection Observer callback
   const handleIntersection = useCallback((entries: IntersectionObserverEntry[]) => {
@@ -104,14 +81,6 @@ const useScrollTrigger = (
     observerRef.current.observe(element);
   }, [handleIntersection, threshold, rootMargin]);
 
-  // Unregister a section
-  const unregisterSection = useCallback((index: number) => {
-    const element = sectionsRef.current.get(index);
-    if (element && observerRef.current) {
-      observerRef.current.unobserve(element);
-      sectionsRef.current.delete(index);
-    }
-  }, []);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -126,7 +95,6 @@ const useScrollTrigger = (
   return {
     activeIndex,
     registerSection,
-    unregisterSection,
   };
 };
 
@@ -255,8 +223,7 @@ export const TextImage: React.FC<TextImageProps> = ({
       const { width, height } = parseAspectRatio(aspectRatio);
       return {
         ratio: calculateAspectRatio(width, height),
-        cssValue: `${width}/${height}`,
-        className: getAspectRatioClass(aspectRatio)
+        cssValue: `${width}/${height}`
       };
     } catch (error: unknown) {
       console.warn('Invalid aspect ratio, falling back to auto:', error);
@@ -264,38 +231,10 @@ export const TextImage: React.FC<TextImageProps> = ({
     }
   }, [aspectRatio]);
 
-  // // Preload images for smooth transitions (optional - Next.js Image handles optimization)
-  // useEffect(() => {
-  //   // Simple timeout fallback if you want to remove preloading entirely
-  //   const timer = setTimeout(() => setImagesLoaded(true), 100);
-    
-  //   const imagePromises = sections.map((section) => {
-  //     return new Promise<void>((resolve, reject) => {
-  //       const img = new window.Image();
-  //       img.onload = () => resolve();
-  //       img.onerror = reject;
-  //       img.src = section.imageUrl;
-  //     });
-  //   });
-
-  //   Promise.all(imagePromises)
-  //     .then(() => {
-  //       clearTimeout(timer);
-  //       setImagesLoaded(true);
-  //     })
-  //     .catch((error: unknown) => {
-  //       console.warn('Some images failed to preload:', error);
-  //       clearTimeout(timer);
-  //       setImagesLoaded(true); // Continue anyway
-  //     });
-
-  //   return () => clearTimeout(timer);
-  // }, [sections]);
-
   // Simple approach - just show immediately
-useEffect(() => {
-  setImagesLoaded(true);
-}, []);
+  useEffect(() => {
+    setImagesLoaded(true);
+  }, []);
 
   return (
     <section className={`${styles.textImageContainer} ${className || ''}`}>

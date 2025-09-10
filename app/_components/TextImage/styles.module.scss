@@ -228,22 +228,6 @@ $desktop-min: 769px;
   }
 }
 
-// Utility classes for aspect ratios
-.aspectRatio16x9 {
-  aspect-ratio: 16/9;
-}
-
-.aspectRatio4x3 {
-  aspect-ratio: 4/3;
-}
-
-.aspectRatio1x1 {
-  aspect-ratio: 1/1;
-}
-
-.aspectRatio3x2 {
-  aspect-ratio: 3/2;
-}
 
 // Animation preferences
 @media (prefers-reduced-motion: reduce) {
