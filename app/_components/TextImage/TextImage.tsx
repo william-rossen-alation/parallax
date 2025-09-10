@@ -129,7 +129,7 @@ export const TextImage: React.FC<TextImageProps> = ({
   transitionDuration = defaultProps.transitionDuration,
   className,
 }) => {
-  const [imagesLoaded, setImagesLoaded] = useState(false);
+  const imagesLoaded = true; // Simplified - Next.js Image handles loading
   
   // Use our custom scroll trigger hook with enhanced settings
   const { activeIndex: activeImageIndex, registerSection } = useScrollTrigger(
@@ -140,72 +140,10 @@ export const TextImage: React.FC<TextImageProps> = ({
     }
   );
 
-  // State for smooth transitions
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // State for dynamic sticky positioning
-  const [stickyOffset, setStickyOffset] = useState(32); // Default 2rem
+  // Ref for the image container
   const imageContainerRef = useRef<HTMLDivElement>(null);
 
-  // Handle smooth transitions between image changes
-  useEffect(() => {
-    // Clear any existing transition timeout
-    if (transitionTimeoutRef.current) {
-      clearTimeout(transitionTimeoutRef.current);
-    }
 
-    // Set transitioning state
-    setIsTransitioning(true);
-
-    // Clear transitioning state after transition completes
-    transitionTimeoutRef.current = setTimeout(() => {
-      setIsTransitioning(false);
-    }, transitionDuration);
-
-    return () => {
-      if (transitionTimeoutRef.current) {
-        clearTimeout(transitionTimeoutRef.current);
-      }
-    };
-  }, [activeImageIndex, transitionDuration]);
-
-  // Calculate optimal sticky offset based on viewport and content
-  useEffect(() => {
-    const calculateStickyOffset = () => {
-      const viewportHeight = window.innerHeight;
-      const textColumnElement = document.querySelector(`.${styles.textColumn}`) as HTMLElement;
-      
-      if (textColumnElement && imageContainerRef.current) {
-        const textRect = textColumnElement.getBoundingClientRect();
-        const imageRect = imageContainerRef.current.getBoundingClientRect();
-        
-        // Calculate offset to center image container vertically within the text content area
-        const textCenterY = textRect.top + (textRect.height / 2);
-        const imageCenterY = imageRect.height / 2;
-        const optimalOffset = Math.max(16, textCenterY - imageCenterY);
-        
-        setStickyOffset(Math.min(optimalOffset, viewportHeight * 0.3)); // Max 30% of viewport
-      }
-    };
-
-    // Calculate on mount and resize
-    calculateStickyOffset();
-    
-    // Debounced resize handler
-    let resizeTimeout: NodeJS.Timeout;
-    const debouncedResize = () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(calculateStickyOffset, 100);
-    };
-    
-    window.addEventListener('resize', debouncedResize);
-    
-    return () => {
-      window.removeEventListener('resize', debouncedResize);
-      clearTimeout(resizeTimeout);
-    };
-  }, [sections.length, imagesLoaded]);
 
   // Ref callback to register text sections with intersection observer
   const createSectionRef = useCallback((index: number) => {
@@ -231,10 +169,6 @@ export const TextImage: React.FC<TextImageProps> = ({
     }
   }, [aspectRatio]);
 
-  // Simple approach - just show immediately
-  useEffect(() => {
-    setImagesLoaded(true);
-  }, []);
 
   return (
     <section className={`${styles.textImageContainer} ${className || ''}`}>
@@ -293,28 +227,22 @@ export const TextImage: React.FC<TextImageProps> = ({
           >
             <div 
               ref={imageContainerRef}
-              className={`${styles.stickyImageContainer} ${isTransitioning ? styles.transitioning : ''}`}
+              className={styles.stickyImageContainer}
               style={{
                 position: 'sticky',
-                top: `${stickyOffset}px`, // Dynamic positioning restored
+                top: '2rem', // Simple fixed offset
                 aspectRatio: aspectRatioData?.cssValue || '16/9',
                 opacity: imagesLoaded ? 1 : 0.7,
                 '--transition-duration': `${transitionDuration}ms`
               } as React.CSSProperties & { '--transition-duration': string }}
             >
-              {!imagesLoaded && (
-                <div className={styles.loadingPlaceholder}>
-                  Loading images...
-                </div>
-              )}
               
               {/* Debug indicator - remove in production */}
               <div className={styles.debugIndicator}>
                 <div>Active: {activeImageIndex + 1} / {sections.length}</div>
                 <div>Sections: {sections.length}</div>
                 <div>Container: {sections.length * 100}vh</div>
-                <div>Transition: {isTransitioning ? 'Active' : 'Idle'}</div>
-                <div>Offset: {Math.round(stickyOffset)}px</div>
+                <div>Offset: 2rem</div>
                 <div>Position: sticky</div>
               </div>
               {sections.map((section, index) => (

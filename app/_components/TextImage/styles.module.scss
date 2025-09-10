@@ -143,21 +143,8 @@ $desktop-min: 769px;
   // Use CSS custom property for transition duration
   --transition-duration: 400ms;
   
-  &.transitioning {
-    // Subtle visual feedback during transitions
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  }
 }
 
-.loadingPlaceholder {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #888;
-  font-size: 0.875rem;
-  z-index: 1;
-}
 
 .debugIndicator {
   position: absolute;
