@@ -24,7 +24,7 @@ export const getAspectRatioClass = (aspectRatio: string): string => {
 
 // Custom hook for scroll-based image transitions
 interface ScrollTriggerOptions {
-  threshold?: number;
+  threshold?: number | number[];
   rootMargin?: string;
 }
 
@@ -264,24 +264,38 @@ export const TextImage: React.FC<TextImageProps> = ({
     }
   }, [aspectRatio]);
 
-  // Preload all images
-  useEffect(() => {
-    const imagePromises = sections.map((section) => {
-      return new Promise<void>((resolve, reject) => {
-        const img = new window.Image();
-        img.onload = () => resolve();
-        img.onerror = reject;
-        img.src = section.imageUrl;
-      });
-    });
+  // // Preload images for smooth transitions (optional - Next.js Image handles optimization)
+  // useEffect(() => {
+  //   // Simple timeout fallback if you want to remove preloading entirely
+  //   const timer = setTimeout(() => setImagesLoaded(true), 100);
+    
+  //   const imagePromises = sections.map((section) => {
+  //     return new Promise<void>((resolve, reject) => {
+  //       const img = new window.Image();
+  //       img.onload = () => resolve();
+  //       img.onerror = reject;
+  //       img.src = section.imageUrl;
+  //     });
+  //   });
 
-    Promise.all(imagePromises)
-      .then(() => setImagesLoaded(true))
-      .catch((error: unknown) => {
-        console.warn('Some images failed to preload:', error);
-        setImagesLoaded(true); // Continue anyway
-      });
-  }, [sections]);
+  //   Promise.all(imagePromises)
+  //     .then(() => {
+  //       clearTimeout(timer);
+  //       setImagesLoaded(true);
+  //     })
+  //     .catch((error: unknown) => {
+  //       console.warn('Some images failed to preload:', error);
+  //       clearTimeout(timer);
+  //       setImagesLoaded(true); // Continue anyway
+  //     });
+
+  //   return () => clearTimeout(timer);
+  // }, [sections]);
+
+  // Simple approach - just show immediately
+useEffect(() => {
+  setImagesLoaded(true);
+}, []);
 
   return (
     <section className={`${styles.textImageContainer} ${className || ''}`}>
