@@ -4,17 +4,17 @@ import Image from 'next/image';
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import styles from './styles.module.scss';
 
-// Utility functions for aspect ratio calculations
-export const parseAspectRatio = (aspectRatio: string): { width: number; height: number } => {
+// Simple aspect ratio utility
+const getAspectRatio = (aspectRatio?: string): { cssValue: string; ratio: number } => {
+  if (!aspectRatio) return { cssValue: '16/9', ratio: 16/9 };
+  
   const parts = aspectRatio.split(':').map(Number);
-  if (parts.length !== 2 || parts.some(isNaN)) {
-    throw new Error(`Invalid aspect ratio format: ${aspectRatio}. Use format like "16:9" or "4:3"`);
+  if (parts.length === 2 && !parts.some(isNaN)) {
+    return { cssValue: `${parts[0]}/${parts[1]}`, ratio: parts[0] / parts[1] };
   }
-  return { width: parts[0], height: parts[1] };
-};
-
-export const calculateAspectRatio = (width: number, height: number): number => {
-  return width / height;
+  
+  // Fallback to 16:9
+  return { cssValue: '16/9', ratio: 16/9 };
 };
 
 
@@ -154,20 +154,8 @@ export const TextImage: React.FC<TextImageProps> = ({
     };
   }, [registerSection]);
 
-  // Calculate aspect ratio values
-  const aspectRatioData = useMemo(() => {
-    if (!aspectRatio) return null;
-    try {
-      const { width, height } = parseAspectRatio(aspectRatio);
-      return {
-        ratio: calculateAspectRatio(width, height),
-        cssValue: `${width}/${height}`
-      };
-    } catch (error: unknown) {
-      console.warn('Invalid aspect ratio, falling back to auto:', error);
-      return null;
-    }
-  }, [aspectRatio]);
+  // Get aspect ratio values
+  const aspectRatioData = useMemo(() => getAspectRatio(aspectRatio), [aspectRatio]);
 
 
   return (
@@ -186,7 +174,7 @@ export const TextImage: React.FC<TextImageProps> = ({
                   src={section.imageUrl}
                   alt={section.imageAlt}
                   width={800}
-                  height={aspectRatioData ? Math.round(800 / aspectRatioData.ratio) : 450}
+                  height={Math.round(800 / aspectRatioData.ratio)}
                   className={styles.image}
                   priority={index === 0} // Prioritize first image
                   sizes="(max-width: 768px) 100vw, 50vw"
@@ -231,7 +219,7 @@ export const TextImage: React.FC<TextImageProps> = ({
               style={{
                 position: 'sticky',
                 top: '2rem', // Simple fixed offset
-                aspectRatio: aspectRatioData?.cssValue || '16/9',
+                aspectRatio: aspectRatioData.cssValue,
                 opacity: imagesLoaded ? 1 : 0.7,
                 '--transition-duration': `${transitionDuration}ms`
               } as React.CSSProperties & { '--transition-duration': string }}
@@ -251,7 +239,7 @@ export const TextImage: React.FC<TextImageProps> = ({
                   src={section.imageUrl}
                   alt={section.imageAlt}
                   width={600}
-                  height={aspectRatioData ? Math.round(600 / aspectRatioData.ratio) : 400}
+                  height={Math.round(600 / aspectRatioData.ratio)}
                   className={`${styles.stickyImage} ${index === activeImageIndex ? styles.active : ''}`}
                   data-section-id={section.id}
                   priority={index === 0}
