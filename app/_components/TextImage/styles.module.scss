@@ -69,8 +69,7 @@ $desktop-min: 769px;
     align-items: stretch; // Make both columns fill available height
     position: relative; // Establish stacking context for sticky
     overflow: visible; // Ensure sticky elements can move
-    min-height: 300vh; // Force minimum height based on 3 sections at 100vh each
-    background: linear-gradient(to bottom, red 1px, transparent 1px); // Debug: show if height exists
+    // height and max-height set dynamically via inline styles based on sections.length
   }
 }
 
@@ -84,7 +83,9 @@ $desktop-min: 769px;
 
 .textSection {
   max-width: var(--text-max-width);
-  min-height: 100vh; // Much larger height to create proper scrollable content
+  height: 100vh;
+  max-height: 40rem;
+  //min-height: 100vh; // Much larger height to create proper scrollable content
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -116,8 +117,6 @@ $desktop-min: 769px;
   padding-left: 1rem;
   flex: 0 0 auto; // Don't grow/shrink, use flexBasis from inline styles
   align-self: stretch; // Stretch to match the height of the flex container
-  background: linear-gradient(to bottom, blue 1px, transparent 1px); // Debug: show column height
-  border: 2px solid green; // Debug: show column boundaries
 }
 
 .stickyImageWrapper {

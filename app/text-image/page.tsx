@@ -23,8 +23,25 @@ const sampleSections: TextImageSection[] = [
     content: 'See your work through your audience\'s eyes and make sure your message is understood the first time.',
     imageUrl: '/medium-text-image/image3.webp',
     imageAlt: 'Reading analysis showing audience perspective'
+  },
+  {
+    id: 'section-4',
+    title: 'Advanced Analytics & Insights',
+    content: 'Dive deep into performance metrics and understand how your content resonates with different audiences across various platforms.',
+    imageUrl: '/medium-text-image/image1.webp',
+    imageAlt: 'Analytics dashboard showing content performance'
   }
 ];
+
+// Test with different section counts
+const twoSections = sampleSections.slice(0, 2);
+const fiveSections = [...sampleSections, {
+  id: 'section-5',
+  title: 'Collaborative Workflows',
+  content: 'Work seamlessly with your team using real-time collaboration tools and shared workspaces.',
+  imageUrl: '/medium-text-image/image2.webp',
+  imageAlt: 'Team collaboration interface'
+}];
 
 export default function TextImagePage() {
   return (
@@ -35,7 +52,7 @@ export default function TextImagePage() {
           TextImage Component Demo
         </h1>
         <h2 style={{ textAlign: 'center', marginBottom: '2rem', color: '#666' }}>
-          Aspect Ratio: 4:3 | Column Ratio: 45:55
+          Dynamic Height: {sampleSections.length} sections × 100vh = {sampleSections.length * 100}vh
         </h2>
       </div>
       <TextImage 

@@ -64,26 +64,25 @@ const useScrollTrigger = (
 
   // Intersection Observer callback
   const handleIntersection = useCallback((entries: IntersectionObserverEntry[]) => {
+    let maxIntersectionRatio = 0;
+    let mostVisibleIndex = 0;
+
     entries.forEach((entry) => {
       const element = entry.target as HTMLElement;
       const sectionIndex = parseInt(element.dataset.sectionIndex || '0', 10);
 
-      if (entry.isIntersecting) {
-        // Different logic based on scroll direction
-        if (scrollDirection === 'down') {
-          // When scrolling down, activate when section enters from bottom
-          if (entry.boundingClientRect.top < window.innerHeight * 0.6) {
-            setActiveIndex(sectionIndex);
-          }
-        } else {
-          // When scrolling up, activate when section enters from top
-          if (entry.boundingClientRect.top > window.innerHeight * 0.2) {
-            setActiveIndex(sectionIndex);
-          }
-        }
+      // Find the section with the highest intersection ratio (most visible)
+      if (entry.isIntersecting && entry.intersectionRatio > maxIntersectionRatio) {
+        maxIntersectionRatio = entry.intersectionRatio;
+        mostVisibleIndex = sectionIndex;
       }
     });
-  }, [scrollDirection]);
+
+    // Only update if we found an intersecting section
+    if (maxIntersectionRatio > 0) {
+      setActiveIndex(mostVisibleIndex);
+    }
+  }, []);
 
   // Register a section for observation
   const registerSection = useCallback((element: HTMLElement | null, index: number) => {
@@ -168,8 +167,8 @@ export const TextImage: React.FC<TextImageProps> = ({
   const { activeIndex: activeImageIndex, registerSection } = useScrollTrigger(
     sections.length,
     {
-      threshold: 0.2, // More sensitive to section changes
-      rootMargin: '-20% 0px -20% 0px' // Balanced trigger zones
+      threshold: [0, 0.25, 0.5, 0.75, 1], // Multiple thresholds for better detection
+      rootMargin: '-30% 0px -30% 0px' // Trigger when section is centered in viewport
     }
   );
 
@@ -311,7 +310,13 @@ export const TextImage: React.FC<TextImageProps> = ({
         </div>
 
         {/* Desktop View: Two-column layout with sticky images */}
-        <div className={styles.desktopLayout}>
+        <div 
+          className={styles.desktopLayout}
+          style={{
+            height: `${sections.length * 100}vh`,
+            maxHeight: `${sections.length * 40}rem`
+          }}
+        >
           <div 
             className={styles.textColumn}
             style={{ flexBasis: `${columnRatio ? columnRatio[0] : 50}%` }}
@@ -338,7 +343,7 @@ export const TextImage: React.FC<TextImageProps> = ({
               className={`${styles.stickyImageContainer} ${isTransitioning ? styles.transitioning : ''}`}
               style={{
                 position: 'sticky',
-                top: '100px', // Fixed for testing
+                top: `${stickyOffset}px`, // Dynamic positioning restored
                 aspectRatio: aspectRatioData?.cssValue || '16/9',
                 opacity: imagesLoaded ? 1 : 0.7,
                 '--transition-duration': `${transitionDuration}ms`
@@ -353,6 +358,8 @@ export const TextImage: React.FC<TextImageProps> = ({
               {/* Debug indicator - remove in production */}
               <div className={styles.debugIndicator}>
                 <div>Active: {activeImageIndex + 1} / {sections.length}</div>
+                <div>Sections: {sections.length}</div>
+                <div>Container: {sections.length * 100}vh</div>
                 <div>Transition: {isTransitioning ? 'Active' : 'Idle'}</div>
                 <div>Offset: {Math.round(stickyOffset)}px</div>
                 <div>Position: sticky</div>
