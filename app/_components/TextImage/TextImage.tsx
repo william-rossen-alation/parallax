@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import styles from './styles.module.scss';
-
+import GradientText from '../GradientText/GradientText';
 // Simple aspect ratio utility
 const getAspectRatio = (aspectRatio?: string): { cssValue: string; ratio: number } => {
   if (!aspectRatio) return { cssValue: '16/9', ratio: 16/9 };

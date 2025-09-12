@@ -98,7 +98,7 @@ export default function GradientText({
 
   return (
     <div className={`${styles.container} ${className}`}>
-      <h1 className={styles.text} ref={containerRef}></h1>
+      <h2 className={styles.text} ref={containerRef}></h2>
 
       {showControls && (
         <div className={styles.buttons}>
